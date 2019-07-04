@@ -25,7 +25,7 @@ class Partitioner():
         return (train, val, test)
 
     def partition(self, refexps, percentage_teste = 20, percentage_validacao = 20):
-        print('************* partitioning')
+        print('************** partitioning')
 
         total_length = len(refexps)
         length_test  = self._partition_size_(total_length, percentage_teste)

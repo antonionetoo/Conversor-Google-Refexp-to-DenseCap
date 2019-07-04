@@ -16,7 +16,7 @@ class ConverterStructurePerImagem(ConverterStructure):
         super().__init__(constructors.ConstructorRegionsPerImagem())
 
     def convert_structure(self, dataset):
-        print('************ converting structure')
+        print('************** converting structure')
         images_converted = dict()
         refexps = []
    
