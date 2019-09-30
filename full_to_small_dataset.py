@@ -48,6 +48,7 @@ dataset['test'] = full['test']
 assert len([i for i in dataset['train'] if i in dataset['test'] + dataset['val']]) == 0, 'Treinamento presente em validação ou teste'
 assert len([i for i in dataset['test']  if i in dataset['val']  + dataset['train']]) == 0, 'Teste presente em validação ou treinamento'
 assert len([i for i in dataset['val']   if i in dataset['test'] + dataset['train']]) == 0, 'Validação presente em teste ou treinamento'
+assert len([i for i in dataset['test']  if i in small['test']]) == len(set(dataset['test'])), 'Erro ao copiar exemplos de treinamento'
 
 total_len = len(dataset['train'] + dataset['test'] + dataset['val'])
 
