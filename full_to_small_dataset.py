@@ -1,12 +1,11 @@
 from help_json import *
 from partitioner import Partitioner
 import argparse
+import re
 
 def remove_if_necessary(partition, element):
     if element in partition:
         partition.remove(t)
-        return True
-    return False
 
 def create_arguments():
    parser = argparse.ArgumentParser()
@@ -15,7 +14,9 @@ def create_arguments():
    parser.add_argument('-full_split')
    parser.add_argument('-full_data')
    parser.add_argument('-len_val', default = 20, type = int)
-   parser.add_argument('-file_destiny', default = 'split_full_test_small.json')   
+   parser.add_argument('-dict_ln_anon_amr', default = '../../ln_amr_anon.json')
+   parser.add_argument('-output_split', default = 'split_full_test_small.json')
+   parser.add_argument('-output_refexps', default = 'google_refexp_phrase_anon.json')
 
    return parser.parse_args()
 
@@ -29,10 +30,8 @@ full['train'] = full['train'] + full['test']
 full['test']  = small['test']
 
 for t in full['test']:
-    if remove_if_necessary(full['val'], t):
-        full['val'].append(full['train'].pop(0))
-    else:
-        remove_if_necessary(full['train'], t)
+    remove_if_necessary(full['val'], t)
+    remove_if_necessary(full['train'], t)
 
 assert len([i for i in full['train'] if i in full['test'] + full['val']]) == 0, 'Treinamento presente em validação ou teste'
 assert len([i for i in full['test']  if i in full['val'] + full['train']]) == 0, 'Teste presente em validação ou treinamento'
@@ -52,10 +51,19 @@ assert len([i for i in dataset['test']  if i in small['test']]) == len(set(datas
 
 total_len = len(dataset['train'] + dataset['test'] + dataset['val'])
 
-save_json(args.file_destiny, dataset)
+print('{} exemplos de treinamento ({}%)'.format(len(dataset['train']), (len(dataset['train']) * 100.0 / total_len)))
+print('{} exemplos de validação ({}%)'.format(len(dataset['val']), (len(dataset['val']) * 100.0 / total_len)))
+print('{} exemplos de teste ({}%)'.format(len(dataset['test']), (len(dataset['test']) * 100.0 / total_len)))
 
-print('{} exemplos de treinamento ({} )'.format(len(dataset['train']), (len(dataset['train']) * 100 / total_len)))
-print('{} exemplos de validação ({} )'.format(len(dataset['val']), (len(dataset['val']) * 100 / total_len)))
-print('{} exemplos de teste ({} )'.format(len(dataset['test']), (len(dataset['test']) * 100 / total_len)))
+data_ln_amr_anon = get_json(args.dict_ln_anon_amr)
+
+for d in refexps:
+    for region in d['regions']:         
+        anon = data_ln_amr_anon[region['phrase']][1]
+        region['phrase'] = re.sub(' +', ' ', anon).replace('\n', '')
+
+save_json(args.output_split, dataset)
+save_json(args.output_refexps, refexps)
+
 
 #python3 full_to_small_dataset.py -small_split ../Split-Small-To-Full/split_anon_small.json -full_split ../Split-Small-To-Full/split_images.json -full_data ../../google_refexp_phrase.json -len_val 20
