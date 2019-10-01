@@ -37,8 +37,8 @@ assert len([i for i in full['train'] if i in full['test'] + full['val']]) == 0, 
 assert len([i for i in full['test']  if i in full['val'] + full['train']]) == 0, 'Teste presente em validação ou treinamento'
 assert len([i for i in full['val']   if i in full['test'] + full['train']]) == 0, 'Validação presente em teste ou treinamento'
 
-refexps = get_json(args.full_data)
-refexps = [r for r in refexps if r['id'] not in full['test']]
+full_data = get_json(args.full_data)
+refexps = [r for r in full_data if r['id'] not in full['test']]
 
 partitioner = Partitioner()
 dataset = partitioner.partition(refexps, percentage_validacao = args.len_val, percentage_teste = 0)
@@ -57,13 +57,16 @@ print('{} exemplos de teste ({}%)'.format(len(dataset['test']), (len(dataset['te
 
 data_ln_amr_anon = get_json(args.dict_ln_anon_amr)
 
-for d in refexps:
-    for region in d['regions']:         
+i = 0
+for d in full_data:
+    for region in d['regions']: 
+        i += 1
         anon = data_ln_amr_anon[region['phrase']][1]
         region['phrase'] = re.sub(' +', ' ', anon).replace('\n', '')
 
+print(i)
 save_json(args.output_split, dataset)
-save_json(args.output_refexps, refexps)
+save_json(args.output_refexps, full_data)
 
 
 #python3 full_to_small_dataset.py -small_split ../Split-Small-To-Full/split_anon_small.json -full_split ../Split-Small-To-Full/split_images.json -full_data ../../google_refexp_phrase.json -len_val 20
